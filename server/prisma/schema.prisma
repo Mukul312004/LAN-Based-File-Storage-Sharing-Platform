@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model FileMetadata {
+  id               String   @id @default(uuid())
+  originalName     String   @map("original_name")
+  storedName       String   @unique @map("stored_name")
+  storagePath      String   @map("storage_path")
+  fileSize         BigInt   @map("file_size")
+  mimeType         String   @default("application/octet-stream") @map("mime_type")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([originalName])
+  @@index([createdAt])
+  @@map("file_metadata")
+}
