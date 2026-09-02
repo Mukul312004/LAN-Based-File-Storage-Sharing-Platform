@@ -317,7 +317,41 @@ npm test
 
 ---
 
-## 🗺️ 18. Future Roadmap
+## ☁️ 18. Deploying to Render
+
+You can deploy this application directly to [Render](https://render.com) using the included `render.yaml` or as a standard Web Service.
+
+### Step 1: Database Setup
+Render does not offer a free managed MySQL service directly, but you can use any free MySQL cloud provider:
+* **[Aiven for MySQL](https://aiven.io/)** (Free tier)
+* **[TiDB Cloud](https://tidbcloud.com/)** (Free serverless MySQL tier)
+* **[Clever Cloud](https://www.clever-cloud.com/)** (Free MySQL addon)
+* **[Railway](https://railway.app/)** (MySQL template)
+
+Copy the MySQL connection URL (e.g. `mysql://user:password@host:port/database`).
+
+### Step 2: Deploy Web Service on Render
+1. Push your repository to **GitHub / GitLab**.
+2. Log into [Render Dashboard](https://dashboard.render.com/) and click **New +** -> **Web Service**.
+3. Select your repository.
+4. Set the following configuration:
+   - **Environment**: `Node`
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npm start`
+5. Under **Environment Variables**, add:
+   - `NODE_ENV` = `production`
+   - `DATABASE_URL` = `your_mysql_connection_url`
+   - `SERVER_NAME` = `My Cloud Storage`
+   - `STORAGE_DIR` = `./storage`
+   - `DISCOVERY_ENABLED` = `false`
+6. *(Optional)* Under **Disks**, add a Persistent Disk with Mount Path `/app/storage` (1GB+) so files persist across redeploys.
+7. Click **Create Web Service**.
+
+Render will automatically build the React assets, push the Prisma schema to MySQL, and deploy your live URL (e.g. `https://lan-file-storage.onrender.com`)!
+
+---
+
+## 🗺️ 19. Future Roadmap
 
 - [ ] **V2**: User Authentication, Device Pairing PINs & QR Code pairing.
 - [ ] **V3**: Distributed Storage Pools, Multi-Node File Chunking & Replication.

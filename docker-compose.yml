@@ -1,4 +1,27 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lan_storage_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "41234:41234/udp"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      SERVER_NAME: "Docker Storage Node"
+      DATABASE_URL: "mysql://storage_user:storage_password@mysql:3306/local_storage"
+      STORAGE_DIR: "/app/storage"
+      DISCOVERY_ENABLED: "true"
+      DISCOVERY_PORT: "41234"
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   mysql:
     image: mysql:8.0
     container_name: lan_storage_mysql

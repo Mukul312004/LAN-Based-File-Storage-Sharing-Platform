@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: lan-file-storage
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: SERVER_NAME
+        value: "Cloud Storage Node"
+      - key: STORAGE_DIR
+        value: "./storage"
+      - key: DISCOVERY_ENABLED
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
