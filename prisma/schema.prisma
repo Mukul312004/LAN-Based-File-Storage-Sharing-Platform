@@ -1,0 +1,22 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model FileRecord {
+  id               String   @id @default(uuid())
+  originalFilename String   @map("original_filename") @db.VarChar(255)
+  storedFilename   String   @unique @map("stored_filename") @db.VarChar(255)
+  storagePath      String   @map("storage_path") @db.VarChar(500)
+  fileSize         BigInt   @map("file_size")
+  mimeType         String   @default("application/octet-stream") @map("mime_type") @db.VarChar(128)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([createdAt])
+  @@map("files")
+}
