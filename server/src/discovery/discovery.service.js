@@ -203,12 +203,38 @@ class DiscoveryService {
   }
 
   /**
-   * Evict peers that haven't sent a heartbeat within peerTimeoutMs
+   * Update online/offline status based on recency and purge very old history
    */
   evictStalePeers() {
     const now = Date.now();
+    const retentionMs = 2 * 60 * 60 * 1000; // 2 hours
+
     for (const [id, peer] of this.peers.entries()) {
-      if (now - peer.lastSeen > this.peerTimeoutMs) {
+      const elapsed = now - peer.lastSeen;
+      if (elapsed > retentionMs) {
+        this.peers.delete(id);
+      } else if (elapsed > this.peerTimeoutMs) {
+        peer.status = 'offline';
+      } else {
+        peer.status = 'online';
+      }
+    }
+  }
+
+  /**
+   * Remove a specific peer from registry
+   */
+  removePeer(peerId) {
+    this.peers.delete(peerId);
+    this.manualPeers.delete(peerId);
+  }
+
+  /**
+   * Clear all offline peers
+   */
+  clearOffline() {
+    for (const [id, peer] of this.peers.entries()) {
+      if (peer.status === 'offline') {
         this.peers.delete(id);
       }
     }
@@ -328,7 +354,7 @@ class DiscoveryService {
   }
 
   /**
-   * Get all active discovered peers + manual peers
+   * Get all active discovered peers + manual peers (Online first, then offline)
    */
   getDiscoveredDevices() {
     this.evictStalePeers();
@@ -338,7 +364,11 @@ class DiscoveryService {
       ...Array.from(this.manualPeers.values()),
     ];
 
-    return allPeers.sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
+    return allPeers.sort((a, b) => {
+      if (a.status === 'online' && b.status !== 'online') return -1;
+      if (a.status !== 'online' && b.status === 'online') return 1;
+      return (b.lastSeen || 0) - (a.lastSeen || 0);
+    });
   }
 }
 

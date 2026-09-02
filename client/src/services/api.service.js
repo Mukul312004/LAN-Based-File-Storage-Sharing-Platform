@@ -116,6 +116,27 @@ export const apiService = {
   },
 
   /**
+   * Send heartbeat to keep this device/browser active in server's client list
+   */
+  async sendHeartbeat(deviceInfo, customHost = null) {
+    try {
+      const url = `${getBaseApiUrl(customHost)}/devices/heartbeat`;
+      const res = await axios.post(
+        url,
+        {
+          clientId: deviceInfo.id,
+          name: deviceInfo.name,
+          deviceType: deviceInfo.type,
+        },
+        { timeout: 3000 }
+      );
+      return res.data;
+    } catch {
+      return null;
+    }
+  },
+
+  /**
    * Trigger active subnet scan
    */
   async scanNetwork(customHost = null) {
@@ -125,6 +146,32 @@ export const apiService = {
       return res.data.data || [];
     } catch {
       return [];
+    }
+  },
+
+  /**
+   * Clear offline devices from history
+   */
+  async clearOfflineDevices(customHost = null) {
+    try {
+      const url = `${getBaseApiUrl(customHost)}/devices/clear-offline`;
+      const res = await axios.post(url);
+      return res.data;
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Remove a specific device from history
+   */
+  async removeDevice(deviceId, customHost = null) {
+    try {
+      const url = `${getBaseApiUrl(customHost)}/devices/${deviceId}`;
+      const res = await axios.delete(url);
+      return res.data;
+    } catch {
+      return null;
     }
   },
 };

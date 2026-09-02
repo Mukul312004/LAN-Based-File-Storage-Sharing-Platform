@@ -10,9 +10,11 @@ import FileUploadModal from './components/storage/FileUploadModal';
 import ConfirmModal from './components/common/ConfirmModal';
 import Toast from './components/common/Toast';
 import apiService from './services/api.service';
+import { detectDeviceInfo } from './utils/device';
 import { AlertCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 
 export function App() {
+  const [deviceInfo] = useState(() => detectDeviceInfo());
   const [localServerInfo, setLocalServerInfo] = useState(null);
   const [serverInfo, setServerInfo] = useState(null);
   const [files, setFiles] = useState([]);
@@ -72,7 +74,7 @@ export function App() {
     }
   }, [getTargetBaseUrl, activeTarget]);
 
-  // Load discovered LAN peers
+  // Load discovered LAN peers & connected clients
   const loadDiscoveredDevices = useCallback(async () => {
     try {
       const devices = await apiService.getDiscoveredDevices();
@@ -81,6 +83,15 @@ export function App() {
       console.warn('Failed to load discovered devices:', err);
     }
   }, []);
+
+  // Send client heartbeat to announce presence to server
+  const sendDeviceHeartbeat = useCallback(async () => {
+    try {
+      await apiService.sendHeartbeat(deviceInfo);
+    } catch {
+      // Non-fatal
+    }
+  }, [deviceInfo]);
 
   // Full refresh handler
   const handleRefresh = useCallback(async () => {
@@ -92,16 +103,37 @@ export function App() {
     handleRefresh();
   }, [activeTarget, handleRefresh]);
 
-  // Periodic polling for discovery & stats
+  // Periodic polling for discovery & stats + robust mobile heartbeat
   useEffect(() => {
+    // Send immediate heartbeat on mount
+    sendDeviceHeartbeat();
+
+    // Pulse heartbeat and fetch devices every 3 seconds
     const interval = setInterval(() => {
+      sendDeviceHeartbeat();
       loadDiscoveredDevices();
       if (!remoteError) {
         loadServerInfo();
       }
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [loadDiscoveredDevices, loadServerInfo, remoteError]);
+    }, 3000);
+
+    // Immediate pulse when phone screen turns on, tab is focused, or network reconnects
+    const handleWakeup = () => {
+      sendDeviceHeartbeat();
+      loadDiscoveredDevices();
+    };
+
+    window.addEventListener('visibilitychange', handleWakeup);
+    window.addEventListener('focus', handleWakeup);
+    window.addEventListener('online', handleWakeup);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('visibilitychange', handleWakeup);
+      window.removeEventListener('focus', handleWakeup);
+      window.removeEventListener('online', handleWakeup);
+    };
+  }, [sendDeviceHeartbeat, loadDiscoveredDevices, loadServerInfo, remoteError]);
 
   // Handle uploading a file (to local or remote target)
   const handleUpload = async (file, onProgress) => {
@@ -189,6 +221,20 @@ export function App() {
     }
   };
 
+  // Clear all offline devices from history
+  const handleClearOffline = async () => {
+    await apiService.clearOfflineDevices();
+    await loadDiscoveredDevices();
+    showToast('Cleared disconnected device history', 'info');
+  };
+
+  // Remove a single device from history
+  const handleRemoveDevice = async (id) => {
+    await apiService.removeDevice(id);
+    await loadDiscoveredDevices();
+    showToast('Device removed from list', 'info');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       {/* Top Header */}
@@ -247,7 +293,10 @@ export function App() {
             onSelectDevice={handleSelectDevice}
             onConnectManual={handleSelectDevice}
             onScanNetwork={handleScanNetwork}
+            onClearOffline={handleClearOffline}
+            onRemoveDevice={handleRemoveDevice}
             isScanning={isScanning}
+            currentDeviceId={deviceInfo.id}
           />
         </div>
 

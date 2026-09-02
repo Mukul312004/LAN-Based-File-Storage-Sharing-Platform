@@ -100,7 +100,7 @@ describe('LAN Device Discovery (Phase 4)', () => {
     expect(invalidFound).toBeUndefined();
   });
 
-  it('DiscoveryService - should evict stale peers after TTL expiration', () => {
+  it('DiscoveryService - should mark stale peers as offline and allow manual removal or clearing', () => {
     const expiredPeerId = 'stale-peer-123';
     discoveryService.peers.set(expiredPeerId, {
       id: expiredPeerId,
@@ -116,6 +116,13 @@ describe('LAN Device Discovery (Phase 4)', () => {
 
     const devices = discoveryService.getDiscoveredDevices();
     const found = devices.find((d) => d.id === expiredPeerId);
-    expect(found).toBeUndefined();
+    expect(found).toBeDefined();
+    expect(found.status).toBe('offline');
+
+    // Now clear offline peers
+    discoveryService.clearOffline();
+    const devicesAfterClear = discoveryService.getDiscoveredDevices();
+    const cleared = devicesAfterClear.find((d) => d.id === expiredPeerId);
+    expect(cleared).toBeUndefined();
   });
 });
