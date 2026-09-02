@@ -16,27 +16,27 @@ export default function Toast({ toast, onClose }) {
   const isSuccess = toast.type === 'success';
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 max-w-sm w-full animate-bounce-short">
+    <div className="fixed bottom-5 right-5 z-50 max-w-sm w-full">
       <div
-        className={`p-4 rounded-xl shadow-lg border flex items-start space-x-3 ${
+        className={`p-3 rounded-md border flex items-start space-x-2.5 transition font-mono text-xs ${
           isError
-            ? 'bg-rose-50 border-rose-200 text-rose-800'
+            ? 'bg-cursor-card dark:bg-cursor-dark-card border-[#cf2d56]/40 text-[#cf2d56]'
             : isSuccess
-            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-            : 'bg-blue-50 border-blue-200 text-blue-800'
+            ? 'bg-cursor-card dark:bg-cursor-dark-card border-[#9fc9a2]/60 text-[#1f8a65] dark:text-[#9fc9a2]'
+            : 'bg-cursor-card dark:bg-cursor-dark-card border-cursor-hairline dark:border-cursor-dark-hairline text-cursor-ink dark:text-cursor-dark-ink'
         }`}
       >
-        {isError && <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />}
-        {isSuccess && <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />}
-        {!isError && !isSuccess && <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />}
+        {isError && <AlertCircle className="w-4 h-4 text-[#cf2d56] shrink-0 mt-0.5" />}
+        {isSuccess && <CheckCircle2 className="w-4 h-4 text-[#1f8a65] dark:text-[#9fc9a2] shrink-0 mt-0.5" />}
+        {!isError && !isSuccess && <Info className="w-4 h-4 text-cursor-orange shrink-0 mt-0.5" />}
 
-        <div className="flex-1 text-sm font-medium">{toast.message}</div>
+        <div className="flex-1 font-normal">{toast.message}</div>
 
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-slate-600 p-0.5 rounded transition"
+          className="text-cursor-muted hover:text-cursor-ink dark:hover:text-cursor-dark-ink p-0.5 transition"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

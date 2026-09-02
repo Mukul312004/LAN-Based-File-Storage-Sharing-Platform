@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Upload, Folder, HardDrive, Laptop } from 'lucide-react';
+import { Search, Upload, Folder, Laptop } from 'lucide-react';
 
 export default function StorageHeader({
   activeTarget,
@@ -11,24 +11,28 @@ export default function StorageHeader({
   const isRemote = activeTarget !== null;
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-cursor-hairline dark:border-cursor-dark-hairline">
       <div className="flex items-center space-x-3">
-        <div className={`p-2.5 rounded-xl ${isRemote ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-          {isRemote ? <Laptop className="w-6 h-6" /> : <Folder className="w-6 h-6" />}
+        <div className={`p-2.5 rounded-md border ${
+          isRemote
+            ? 'bg-[#dfa88f]/20 border-[#dfa88f]/40 text-cursor-orange'
+            : 'bg-cursor-canvas-soft dark:bg-cursor-dark-canvas-soft border-cursor-hairline dark:border-cursor-dark-hairline text-cursor-ink dark:text-cursor-dark-ink'
+        }`}>
+          {isRemote ? <Laptop className="w-5 h-5" /> : <Folder className="w-5 h-5" />}
         </div>
         <div>
           <div className="flex items-center space-x-2">
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-normal text-cursor-ink dark:text-cursor-dark-ink tracking-editorial">
               {isRemote ? `Remote Storage: ${activeTarget.name || activeTarget.host}` : 'My Storage'}
             </h2>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-cursor-canvas dark:bg-cursor-dark-canvas border border-cursor-hairline dark:border-cursor-dark-hairline text-cursor-muted dark:text-cursor-dark-body">
               {totalFiles} {totalFiles === 1 ? 'file' : 'files'}
             </span>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-cursor-muted dark:text-cursor-dark-body font-mono">
             {isRemote
-              ? `Browsing files stored on ${activeTarget.host}:${activeTarget.port}`
-              : 'Files stored locally on this machine'}
+              ? `Files on ${activeTarget.host}:${activeTarget.port}`
+              : 'Encapsulated local filesystem storage'}
           </p>
         </div>
       </div>
@@ -36,24 +40,20 @@ export default function StorageHeader({
       <div className="flex items-center space-x-3 w-full sm:w-auto">
         {/* Search input */}
         <div className="relative flex-1 sm:w-64">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-cursor-muted" />
           <input
             type="text"
             placeholder="Search files..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-9 pr-3 py-2 bg-cursor-card dark:bg-cursor-dark-card border border-cursor-hairline dark:border-cursor-dark-hairline rounded-md text-sm text-cursor-ink dark:text-cursor-dark-ink placeholder:text-cursor-muted focus:border-cursor-orange transition"
           />
         </div>
 
-        {/* Upload Action Button */}
+        {/* Upload Action Button with Cursor Orange Brand CTA */}
         <button
           onClick={onOpenUpload}
-          className={`inline-flex items-center space-x-2 px-4 py-2 font-semibold text-sm rounded-xl text-white shadow-sm transition shrink-0 ${
-            isRemote
-              ? 'bg-amber-600 hover:bg-amber-700'
-              : 'bg-blue-600 hover:bg-blue-700'
-          }`}
+          className="inline-flex items-center space-x-2 px-4 py-2 font-medium text-sm rounded-md text-white bg-cursor-orange hover:bg-cursor-orange-active transition shrink-0"
         >
           <Upload className="w-4 h-4" />
           <span>Upload File</span>

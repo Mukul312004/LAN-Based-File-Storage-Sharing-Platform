@@ -15,19 +15,19 @@ import { formatBytes, formatDate, getFileTypeCategory } from '../../utils/format
 function getFileIcon(category) {
   switch (category) {
     case 'image':
-      return <Image className="w-5 h-5 text-emerald-500" />;
+      return <Image className="w-4 h-4 text-[#1f8a65] dark:text-[#9fc9a2]" />;
     case 'video':
-      return <Video className="w-5 h-5 text-purple-500" />;
+      return <Video className="w-4 h-4 text-[#c0a8dd]" />;
     case 'audio':
-      return <Music className="w-5 h-5 text-rose-500" />;
+      return <Music className="w-4 h-4 text-[#dfa88f]" />;
     case 'pdf':
-      return <FileText className="w-5 h-5 text-red-500" />;
+      return <FileText className="w-4 h-4 text-[#cf2d56]" />;
     case 'archive':
-      return <Archive className="w-5 h-5 text-amber-500" />;
+      return <Archive className="w-4 h-4 text-[#c08532]" />;
     case 'code':
-      return <Code className="w-5 h-5 text-cyan-500" />;
+      return <Code className="w-4 h-4 text-[#9fbbe0]" />;
     default:
-      return <File className="w-5 h-5 text-blue-500" />;
+      return <File className="w-4 h-4 text-cursor-muted" />;
   }
 }
 
@@ -35,24 +35,22 @@ export default function FileItem({ file, onDownload, onDelete }) {
   const category = getFileTypeCategory(file.mimeType, file.originalName);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 hover:border-slate-300 hover:shadow-xs transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
+    <div className="bg-cursor-card dark:bg-cursor-dark-card border border-cursor-hairline dark:border-cursor-dark-hairline rounded-md p-3 hover:border-cursor-hairline-strong dark:hover:border-cursor-dark-hairline-strong transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
       {/* File info */}
-      <div className="flex items-center space-x-3.5 min-w-0 flex-1">
-        <div className="p-2.5 bg-slate-50 border border-slate-100 rounded-xl shrink-0 group-hover:bg-slate-100 transition">
+      <div className="flex items-center space-x-3 min-w-0 flex-1">
+        <div className="p-2 bg-cursor-canvas dark:bg-cursor-dark-canvas border border-cursor-hairline dark:border-cursor-dark-hairline rounded shrink-0 group-hover:border-cursor-hairline-strong transition">
           {getFileIcon(category)}
         </div>
 
         <div className="min-w-0 flex-1">
           <h4
-            className="text-sm font-bold text-slate-900 truncate"
+            className="text-sm font-normal text-cursor-ink dark:text-cursor-dark-ink truncate tracking-editorial"
             title={file.originalName}
           >
             {file.originalName}
           </h4>
-          <div className="flex items-center space-x-2 text-xs text-slate-500 mt-0.5">
-            <span className="font-medium text-slate-600">
-              {formatBytes(file.fileSize)}
-            </span>
+          <div className="flex items-center space-x-2 text-xs font-mono text-cursor-muted dark:text-cursor-dark-body mt-0.5">
+            <span>{formatBytes(file.fileSize)}</span>
             <span>•</span>
             <span>{formatDate(file.createdAt)}</span>
           </div>
@@ -60,22 +58,22 @@ export default function FileItem({ file, onDownload, onDelete }) {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end space-x-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+      <div className="flex items-center justify-end space-x-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-cursor-hairline-soft dark:border-cursor-dark-hairline">
         <button
           onClick={() => onDownload(file)}
           title="Download file"
-          className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-lg text-xs font-semibold transition"
+          className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-cursor-canvas dark:bg-cursor-dark-canvas hover:bg-cursor-canvas-soft dark:hover:bg-cursor-dark-card text-cursor-ink dark:text-cursor-dark-ink border border-cursor-hairline-strong dark:border-cursor-dark-hairline rounded text-xs font-mono transition"
         >
-          <Download className="w-3.5 h-3.5" />
+          <Download className="w-3 h-3 text-cursor-muted" />
           <span>Download</span>
         </button>
 
         <button
           onClick={() => onDelete(file)}
           title="Delete file"
-          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+          className="p-1.5 text-cursor-muted hover:text-[#cf2d56] hover:bg-cursor-canvas dark:hover:bg-cursor-dark-canvas rounded transition"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

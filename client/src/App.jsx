@@ -27,6 +27,27 @@ export function App() {
   const [fileToDelete, setFileToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState(null);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const saved = localStorage.getItem('lan_dfs_theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  // Sync dark mode class on <html> element
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('lan_dfs_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('lan_dfs_theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => {
+    setIsDark((prev) => !prev);
+  };
 
   const getTargetBaseUrl = useCallback(() => {
     return activeTarget ? `http://${activeTarget.host}:${activeTarget.port}` : null;
@@ -105,10 +126,7 @@ export function App() {
 
   // Periodic polling for discovery & stats + robust mobile heartbeat
   useEffect(() => {
-    // Send immediate heartbeat on mount
     sendDeviceHeartbeat();
-
-    // Pulse heartbeat and fetch devices every 3 seconds
     const interval = setInterval(() => {
       sendDeviceHeartbeat();
       loadDiscoveredDevices();
@@ -117,7 +135,6 @@ export function App() {
       }
     }, 3000);
 
-    // Immediate pulse when phone screen turns on, tab is focused, or network reconnects
     const handleWakeup = () => {
       sendDeviceHeartbeat();
       loadDiscoveredDevices();
@@ -236,7 +253,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+    <div className="min-h-screen bg-cursor-canvas dark:bg-cursor-dark-canvas text-cursor-ink dark:text-cursor-dark-ink flex flex-col transition-colors">
       {/* Top Header */}
       <Header
         serverInfo={serverInfo || localServerInfo}
@@ -244,41 +261,43 @@ export function App() {
         onResetToLocal={handleResetToLocal}
         onRefresh={handleRefresh}
         loading={loading}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-5">
         {/* Remote Connection Error Alert */}
         {remoteError && (
-          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-rose-800 text-sm">
-            <div className="flex items-center space-x-3">
-              <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          <div className="p-3.5 bg-[#cf2d56]/10 border border-[#cf2d56]/30 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[#cf2d56] text-xs font-mono">
+            <div className="flex items-center space-x-2.5">
+              <AlertCircle className="w-4 h-4 text-[#cf2d56] shrink-0" />
               <div>
-                <p className="font-bold">Remote Connection Error</p>
-                <p className="text-xs text-rose-600">{remoteError}</p>
+                <p className="font-medium">Remote Connection Error</p>
+                <p className="text-[11px] opacity-90">{remoteError}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 shrink-0">
               <button
                 onClick={handleRefresh}
-                className="inline-flex items-center space-x-1 px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 font-semibold text-xs rounded-lg transition"
+                className="inline-flex items-center space-x-1 px-2.5 py-1 bg-cursor-card dark:bg-cursor-dark-card hover:bg-cursor-canvas dark:hover:bg-cursor-dark-canvas border border-cursor-hairline dark:border-cursor-dark-hairline rounded text-xs transition"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
+                <RefreshCw className="w-3 h-3" />
                 <span>Retry</span>
               </button>
               <button
                 onClick={handleResetToLocal}
-                className="inline-flex items-center space-x-1 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-lg transition shadow-sm"
+                className="inline-flex items-center space-x-1 px-2.5 py-1 bg-[#cf2d56] hover:bg-[#b02244] text-white rounded text-xs transition font-medium"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Return to Local Storage</span>
+                <ArrowLeft className="w-3 h-3" />
+                <span>Return to Local</span>
               </button>
             </div>
           </div>
         )}
 
         {/* Top 3 Dashboard Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <ServerStatusCard
             serverInfo={serverInfo || localServerInfo}
             activeTarget={activeTarget}
@@ -301,7 +320,7 @@ export function App() {
         </div>
 
         {/* Main File Management Panel */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-5">
+        <div className="bg-cursor-card dark:bg-cursor-dark-card rounded-lg border border-cursor-hairline dark:border-cursor-dark-hairline p-5 sm:p-6 space-y-4 transition-colors">
           <StorageHeader
             activeTarget={activeTarget}
             searchTerm={searchTerm}
@@ -344,7 +363,7 @@ export function App() {
               }.`
             : ''
         }
-        confirmText="Yes, Delete"
+        confirmText="Delete"
         cancelText="Cancel"
         onConfirm={handleConfirmDelete}
         onCancel={() => setFileToDelete(null)}

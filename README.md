@@ -1,11 +1,11 @@
-# 📁 LAN File Storage MVP
+# LAN File Storage MVP
 
 > **A LAN-first, self-hosted file storage and sharing application.**  
 > Turn any computer or device into your own lightweight, secure Google Drive running on your local network.
 
 ---
 
-## 📖 1. Project Overview
+## 1. Project Overview
 
 **LAN File Storage** is a lightweight, zero-cloud personal file storage platform. Any machine running this application acts as an independent storage server on your local Wi-Fi / Ethernet network.
 
@@ -27,19 +27,19 @@ Phone / Laptop B (Client / Peer Node)
 
 ---
 
-## ✨ 2. Key Features
+## 2. Key Features
 
-- 🚀 **Zero-Cloud & LAN-First**: All data stays strictly on your local network. No external servers or internet required.
-- 📡 **Automatic Device Discovery**: Pure JavaScript UDP broadcast protocol discovers other nodes on the Wi-Fi in real-time with zero native dependencies.
-- 💻 **Dual-Mode Operation**: Seamlessly switch between **My Storage** (local filesystem) and **Remote Storage** (any discovered LAN peer).
-- ⚡ **True Streaming File Transfers**: Memory-safe streaming file uploads and downloads. Does not buffer entire large files in RAM.
-- 🛡️ **Path Traversal Protection & Sanitization**: Filenames are sanitized and stored using unique UUID prefixes within an isolated `./storage/` boundary.
-- 📊 **Disk & System Metrics**: Real-time disk capacity progress, used/free space reporting, and file counter.
-- 📱 **Mobile & Desktop Responsive**: Clean, modern React dashboard optimized for smartphones, tablets, and laptops.
+- **Zero-Cloud & LAN-First**: All data stays strictly on your local network. No external servers or internet required.
+- **Automatic Device Discovery**: Pure JavaScript UDP broadcast protocol discovers other nodes on the Wi-Fi in real-time with zero native dependencies.
+- **Dual-Mode Operation**: Seamlessly switch between **My Storage** (local filesystem) and **Remote Storage** (any discovered LAN peer).
+- **True Streaming File Transfers**: Memory-safe streaming file uploads and downloads. Does not buffer entire large files in RAM.
+- **Path Traversal Protection & Sanitization**: Filenames are sanitized and stored using unique UUID prefixes within an isolated `./storage/` boundary.
+- **Disk & System Metrics**: Real-time disk capacity progress, used/free space reporting, and file counter.
+- **Mobile & Desktop Responsive**: Clean, modern React dashboard optimized for smartphones, tablets, and laptops.
 
 ---
 
-## 🏛️ 3. Architecture
+## 3. Architecture
 
 ```
                        ┌─────────────────────────────────────────┐
@@ -79,7 +79,7 @@ Phone / Laptop B (Client / Peer Node)
 
 ---
 
-## 🛠️ 4. Tech Stack
+## 4. Tech Stack
 
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
@@ -92,7 +92,7 @@ Phone / Laptop B (Client / Peer Node)
 
 ---
 
-## 📋 5. Prerequisites
+## 5. Prerequisites
 
 - **Node.js**: v18.0.0 or higher (v20+ recommended)
 - **npm**: v9.0.0 or higher
@@ -100,7 +100,7 @@ Phone / Laptop B (Client / Peer Node)
 
 ---
 
-## 🗄️ 6. MySQL Setup
+## 6. MySQL Setup
 
 You can use either your existing local MySQL installation or the provided Docker Compose file.
 
@@ -125,7 +125,7 @@ docker compose up -d
 
 ---
 
-## ⚙️ 7. Environment Variables
+## 7. Environment Variables
 
 Create `.env` in the root directory (or copy from `.env.example`):
 
@@ -150,7 +150,7 @@ PEER_TIMEOUT=10000
 
 ---
 
-## 📦 8. Installation
+## 8. Installation
 
 Install all dependencies for root, server, and client:
 
@@ -169,7 +169,7 @@ npm run prisma:push --workspace=server
 
 ---
 
-## 🚀 9. Running the Application
+## 9. Running the Application
 
 ### Start both Backend and Frontend concurrently:
 ```bash
@@ -188,18 +188,18 @@ npm run dev:client
 Upon boot, the server displays:
 ```
 ====================================================
-🚀 Storage Node Started: "My Storage Node"
-📁 Local Storage Dir:   C:\Users\...\storage
+Storage Node Started: "My Storage Node"
+Local Storage Dir:   C:\Users\...\storage
 ----------------------------------------------------
 Local Access:    http://localhost:3000
 LAN Network:     http://192.168.29.17:3000
 ====================================================
-📡 LAN Discovery service active on UDP port 41234
+LAN Discovery service active on UDP port 41234
 ```
 
 ---
 
-## 🌐 10. Finding the LAN Server
+## 10. Finding the LAN Server
 
 - The server automatically detects your active network adapter and binds to `0.0.0.0` (all network interfaces).
 - The dashboard prints the exact LAN IP (e.g. `http://192.168.29.17:3000`) and provides a one-click copy button.
@@ -207,7 +207,7 @@ LAN Network:     http://192.168.29.17:3000
 
 ---
 
-## 📡 11. Device Discovery
+## 11. Device Discovery
 
 - **Protocol**: Pure Node.js UDP Broadcast (`dgram` socket).
 - **Broadcast Port**: UDP `41234`.
@@ -218,7 +218,7 @@ LAN Network:     http://192.168.29.17:3000
 
 ---
 
-## 📱 12. Connecting Another Device (Real-World Workflow)
+## 12. Connecting Another Device (Real-World Workflow)
 
 ### Example: Laptop A (Server) + Phone (Client)
 
@@ -241,7 +241,7 @@ LAN Network:     http://192.168.29.17:3000
 
 ---
 
-## 📤 13. Uploading, Downloading & Deleting Files
+## 13. Uploading, Downloading & Deleting Files
 
 ### Uploads
 - Files are streamed directly to disk via Multer disk storage.
@@ -258,7 +258,7 @@ LAN Network:     http://192.168.29.17:3000
 
 ---
 
-## 📡 14. API Endpoints Reference
+## 14. API Endpoints Reference
 
 ### System & Discovery
 | Method | Endpoint | Description |
@@ -279,7 +279,7 @@ LAN Network:     http://192.168.29.17:3000
 
 ---
 
-## 🔒 15. Storage Configuration & Security
+## 15. Storage Configuration & Security
 
 - **Safe Filename Generation**: Files are saved as `<uuid>_<sanitized_name>.<ext>` to prevent collisions and illegal characters.
 - **Path Traversal Guard**: All file resolution is validated with `path.relative` to ensure paths never escape the configured `./storage/` root.
@@ -288,7 +288,7 @@ LAN Network:     http://192.168.29.17:3000
 
 ---
 
-## 🧪 16. Automated Testing
+## 16. Automated Testing
 
 Run the automated Vitest test suite:
 
@@ -307,7 +307,7 @@ npm test
 
 ---
 
-## ⚠️ 17. Known Limitations & Firewall Considerations
+## 17. Known Limitations & Firewall Considerations
 
 1. **Windows Firewall Prompt**:
    - When first running on Windows, Windows Defender Firewall may prompt to allow Node.js on Private networks. Click **"Allow Access"** to permit incoming LAN connections and UDP broadcasts.
@@ -317,7 +317,7 @@ npm test
 
 ---
 
-## ☁️ 18. Deploying to Render
+## 18. Deploying to Render
 
 You can deploy this application directly to [Render](https://render.com) using the included `render.yaml` or as a standard Web Service.
 
@@ -351,7 +351,7 @@ Render will automatically build the React assets, push the Prisma schema to MySQ
 
 ---
 
-## 🗺️ 19. Future Roadmap
+## 19. Future Roadmap
 
 - [ ] **V2**: User Authentication, Device Pairing PINs & QR Code pairing.
 - [ ] **V3**: Distributed Storage Pools, Multi-Node File Chunking & Replication.
@@ -359,5 +359,5 @@ Render will automatically build the React assets, push the Prisma schema to MySQ
 
 ---
 
-## 📄 License
+## License
 MIT License. Free for personal and commercial use.

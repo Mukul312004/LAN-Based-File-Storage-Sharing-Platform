@@ -1,9 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+@layer base {
+  body {
+    @apply bg-cursor-canvas text-cursor-ink font-sans transition-colors duration-200 antialiased;
+  }
+  
+  .dark body {
+    @apply bg-cursor-dark-canvas text-cursor-dark-ink;
+  }
+
+  /* Remove default focus rings and use subtle hairline focus */
+  input:focus, button:focus {
+    outline: none;
+  }
+}
+
+/* Custom hairline borders */
+.hairline-border {
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* Custom scrollbar matching Cursor editor */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d2cb;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #383630;
 }

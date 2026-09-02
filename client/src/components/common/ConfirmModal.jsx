@@ -14,34 +14,34 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 relative animate-scale-in">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-cursor-ink/30 dark:bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-cursor-card dark:bg-cursor-dark-card rounded-lg max-w-md w-full p-6 border border-cursor-hairline dark:border-cursor-dark-hairline relative">
         <button
           onClick={onCancel}
           disabled={loading}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition"
+          className="absolute top-4 right-4 text-cursor-muted hover:text-cursor-ink dark:hover:text-cursor-dark-ink transition"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="p-2.5 bg-rose-100 text-rose-600 rounded-xl">
-            <AlertTriangle className="w-6 h-6" />
+        <div className="flex items-center space-x-3 mb-3">
+          <div className="p-2 bg-[#cf2d56]/10 text-[#cf2d56] rounded-md border border-[#cf2d56]/30">
+            <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">{title}</h3>
-            <p className="text-xs text-slate-500">This action cannot be undone</p>
+            <h3 className="text-base font-normal text-cursor-ink dark:text-cursor-dark-ink tracking-editorial">{title}</h3>
+            <p className="text-[11px] font-mono text-cursor-muted">Permanent deletion</p>
           </div>
         </div>
 
-        <p className="text-sm text-slate-600 mb-6 leading-relaxed">{message}</p>
+        <p className="text-xs text-cursor-body dark:text-cursor-dark-body mb-5 leading-relaxed">{message}</p>
 
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end space-x-2">
           <button
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition disabled:opacity-50"
+            className="px-3.5 py-1.5 text-xs font-mono text-cursor-body dark:text-cursor-dark-body hover:bg-cursor-canvas dark:hover:bg-cursor-dark-canvas border border-cursor-hairline dark:border-cursor-dark-hairline rounded-md transition disabled:opacity-40"
           >
             {cancelText}
           </button>
@@ -49,7 +49,7 @@ export default function ConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition shadow-sm disabled:opacity-50"
+            className="px-4 py-1.5 text-xs font-medium text-white bg-[#cf2d56] hover:bg-[#b02244] rounded-md transition disabled:opacity-40"
           >
             {loading ? 'Deleting...' : confirmText}
           </button>
