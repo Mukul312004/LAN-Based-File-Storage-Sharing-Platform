@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import systemRoutes from './routes/system.routes.js';
 import fileRoutes from './routes/file.routes.js';
+import discoveryRoutes from './routes/discovery.routes.js';
 import { notFoundHandler, errorHandler } from './middleware/error.middleware.js';
 
 export function createApp() {
@@ -23,6 +24,7 @@ export function createApp() {
   // API Routes
   app.use('/api', systemRoutes);
   app.use('/api/files', fileRoutes);
+  app.use('/api/devices', discoveryRoutes);
 
   // Error handling
   app.use(notFoundHandler);

@@ -2,6 +2,7 @@ import config from './config/config.js';
 import { createApp } from './app.js';
 import { getPrimaryLanIp, getNetworkAddresses } from './utils/network.utils.js';
 import storageService from './services/storage.service.js';
+import discoveryService from './discovery/discovery.service.js';
 
 const app = createApp();
 
@@ -26,11 +27,15 @@ const server = app.listen(config.port, '0.0.0.0', () => {
     });
   }
   console.log('====================================================');
+
+  // Start LAN discovery broadcaster and listener
+  discoveryService.startDiscovery();
 });
 
 // Handle graceful shutdown
 process.on('SIGTERM', () => {
   console.log('Shutting down server...');
+  discoveryService.stopDiscovery();
   server.close(() => {
     console.log('Server shut down cleanly.');
   });
@@ -38,6 +43,7 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   console.log('Shutting down server (Ctrl+C)...');
+  discoveryService.stopDiscovery();
   server.close(() => {
     console.log('Server shut down cleanly.');
   });

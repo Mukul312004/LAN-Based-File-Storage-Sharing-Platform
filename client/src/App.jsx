@@ -10,13 +10,16 @@ import FileUploadModal from './components/storage/FileUploadModal';
 import ConfirmModal from './components/common/ConfirmModal';
 import Toast from './components/common/Toast';
 import apiService from './services/api.service';
+import { AlertCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 
 export function App() {
+  const [localServerInfo, setLocalServerInfo] = useState(null);
   const [serverInfo, setServerInfo] = useState(null);
   const [files, setFiles] = useState([]);
   const [discoveredDevices, setDiscoveredDevices] = useState([]);
-  const [activeTarget, setActiveTarget] = useState(null); // null means local server, or { name, host, port }
+  const [activeTarget, setActiveTarget] = useState(null); // null means local server, or { id, name, host, port }
   const [loading, setLoading] = useState(false);
+  const [remoteError, setRemoteError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
@@ -31,36 +34,45 @@ export function App() {
     setToast({ message, type });
   };
 
-  // Load local server info and storage metrics
+  // Load server info (local or remote)
   const loadServerInfo = useCallback(async () => {
     try {
       const targetUrl = getTargetBaseUrl();
       const info = await apiService.getServerInfo(targetUrl);
       setServerInfo(info);
+      if (!activeTarget) {
+        setLocalServerInfo(info);
+      }
+      setRemoteError(null);
     } catch (err) {
       console.error('Failed to load server info:', err);
       if (activeTarget) {
-        showToast(`Could not connect to ${activeTarget.name || activeTarget.host}`, 'error');
+        setRemoteError(`Unable to communicate with ${activeTarget.name || activeTarget.host}:${activeTarget.port}`);
       }
     }
   }, [getTargetBaseUrl, activeTarget]);
 
-  // Load files for current active target
+  // Load files for current active target (local or remote)
   const loadFiles = useCallback(async () => {
     setLoading(true);
     try {
       const targetUrl = getTargetBaseUrl();
       const fileList = await apiService.listFiles(targetUrl);
       setFiles(fileList);
+      setRemoteError(null);
     } catch (err) {
       console.error('Failed to load files:', err);
-      showToast('Failed to fetch file list', 'error');
+      if (activeTarget) {
+        setRemoteError(`Failed to fetch file list from ${activeTarget.name || activeTarget.host}`);
+      } else {
+        showToast('Failed to fetch local file list', 'error');
+      }
     } finally {
       setLoading(false);
     }
-  }, [getTargetBaseUrl]);
+  }, [getTargetBaseUrl, activeTarget]);
 
-  // Load discovered devices
+  // Load discovered LAN peers
   const loadDiscoveredDevices = useCallback(async () => {
     try {
       const devices = await apiService.getDiscoveredDevices();
@@ -75,27 +87,35 @@ export function App() {
     await Promise.all([loadServerInfo(), loadFiles(), loadDiscoveredDevices()]);
   }, [loadServerInfo, loadFiles, loadDiscoveredDevices]);
 
-  // Initial load
+  // Trigger load when target server changes
   useEffect(() => {
     handleRefresh();
-    // Periodic refresh for devices & stats every 8 seconds
+  }, [activeTarget, handleRefresh]);
+
+  // Periodic polling for discovery & stats
+  useEffect(() => {
     const interval = setInterval(() => {
       loadDiscoveredDevices();
-      loadServerInfo();
-    }, 8000);
+      if (!remoteError) {
+        loadServerInfo();
+      }
+    }, 6000);
     return () => clearInterval(interval);
-  }, [handleRefresh, loadDiscoveredDevices, loadServerInfo]);
+  }, [loadDiscoveredDevices, loadServerInfo, remoteError]);
 
-  // Handle uploading a file
+  // Handle uploading a file (to local or remote target)
   const handleUpload = async (file, onProgress) => {
     const targetUrl = getTargetBaseUrl();
     const uploaded = await apiService.uploadFile(file, onProgress, targetUrl);
-    showToast(`"${uploaded.originalName}" uploaded successfully!`, 'success');
+    showToast(
+      `"${uploaded.originalName}" uploaded to ${activeTarget ? activeTarget.name || activeTarget.host : 'My Storage'}!`,
+      'success'
+    );
     await loadFiles();
     await loadServerInfo();
   };
 
-  // Handle downloading a file
+  // Handle downloading a file (from local or remote target)
   const handleDownload = async (file) => {
     try {
       const targetUrl = getTargetBaseUrl();
@@ -112,7 +132,7 @@ export function App() {
     setFileToDelete(file);
   };
 
-  // Execute file deletion
+  // Execute file deletion (on local or remote target)
   const handleConfirmDelete = async () => {
     if (!fileToDelete) return;
     setDeleting(true);
@@ -133,23 +153,47 @@ export function App() {
 
   // Switch to a remote peer node
   const handleSelectDevice = (device) => {
+    setRemoteError(null);
     setActiveTarget(device);
     setSearchTerm('');
-    showToast(`Switched storage view to "${device.name || device.host}"`, 'info');
+    showToast(`Connecting to "${device.name || device.host}"...`, 'info');
   };
 
   // Reset view to local node
   const handleResetToLocal = () => {
+    setRemoteError(null);
     setActiveTarget(null);
     setSearchTerm('');
     showToast('Switched back to My Local Storage', 'info');
+  };
+
+  const [isScanning, setIsScanning] = useState(false);
+
+  // Trigger active network scan
+  const handleScanNetwork = async () => {
+    setIsScanning(true);
+    showToast('Scanning local Wi-Fi subnet for active storage peers...', 'info');
+    try {
+      const scannedDevices = await apiService.scanNetwork();
+      setDiscoveredDevices(scannedDevices);
+      if (scannedDevices.length > 0) {
+        showToast(`Found ${scannedDevices.length} storage node(s) on Wi-Fi!`, 'success');
+      } else {
+        showToast('Subnet scan complete. No other nodes found on this subnet.', 'info');
+      }
+    } catch (err) {
+      console.warn('Scan error:', err);
+      showToast('Scan completed.', 'info');
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       {/* Top Header */}
       <Header
-        serverInfo={serverInfo}
+        serverInfo={serverInfo || localServerInfo}
         activeTarget={activeTarget}
         onResetToLocal={handleResetToLocal}
         onRefresh={handleRefresh}
@@ -158,10 +202,39 @@ export function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+        {/* Remote Connection Error Alert */}
+        {remoteError && (
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-rose-800 text-sm">
+            <div className="flex items-center space-x-3">
+              <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+              <div>
+                <p className="font-bold">Remote Connection Error</p>
+                <p className="text-xs text-rose-600">{remoteError}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 shrink-0">
+              <button
+                onClick={handleRefresh}
+                className="inline-flex items-center space-x-1 px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 font-semibold text-xs rounded-lg transition"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Retry</span>
+              </button>
+              <button
+                onClick={handleResetToLocal}
+                className="inline-flex items-center space-x-1 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-lg transition shadow-sm"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Return to Local Storage</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Top 3 Dashboard Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <ServerStatusCard
-            serverInfo={serverInfo}
+            serverInfo={serverInfo || localServerInfo}
             activeTarget={activeTarget}
           />
           <StorageStatsCard
@@ -173,6 +246,8 @@ export function App() {
             activeTarget={activeTarget}
             onSelectDevice={handleSelectDevice}
             onConnectManual={handleSelectDevice}
+            onScanNetwork={handleScanNetwork}
+            isScanning={isScanning}
           />
         </div>
 
@@ -215,7 +290,9 @@ export function App() {
         title="Delete File"
         message={
           fileToDelete
-            ? `Are you sure you want to delete "${fileToDelete.originalName}"? This will permanently remove the file from disk and database.`
+            ? `Are you sure you want to delete "${fileToDelete.originalName}"? This will permanently remove the file from ${
+                activeTarget ? activeTarget.name || activeTarget.host : 'local storage'
+              }.`
             : ''
         }
         confirmText="Yes, Delete"

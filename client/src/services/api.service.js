@@ -1,17 +1,34 @@
 import axios from 'axios';
 
 /**
- * Creates an Axios client instance targeting either the local server or a remote node
+ * Resolves the base API URL for either local server or a remote node
  */
 export function getBaseApiUrl(customHost = null) {
-  if (!customHost) {
-    return '/api';
+  if (customHost) {
+    return `${customHost.replace(/\/+$/, '')}/api`;
   }
-  const cleanHost = customHost.replace(/\/+$/, '');
-  return `${cleanHost}/api`;
+  
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    // If accessing via LAN IP on Vite dev port 5173, point directly to backend port 3000
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1' && window.location.port === '5173') {
+      return `http://${hostname}:3000/api`;
+    }
+  }
+
+  return '/api';
 }
 
 export const apiService = {
+  /**
+   * Check health/liveness of a remote or local node
+   */
+  async checkHealth(customHost = null) {
+    const url = `${getBaseApiUrl(customHost)}/health`;
+    const res = await axios.get(url, { timeout: 4000 });
+    return res.data;
+  },
+
   /**
    * Fetch server information and disk stats
    */
@@ -22,7 +39,7 @@ export const apiService = {
   },
 
   /**
-   * Fetch file list
+   * Fetch file list from target server
    */
   async listFiles(customHost = null) {
     const url = `${getBaseApiUrl(customHost)}/files`;
@@ -77,7 +94,7 @@ export const apiService = {
   },
 
   /**
-   * Delete a file by ID
+   * Delete a file by ID on target server
    */
   async deleteFile(fileId, customHost = null) {
     const url = `${getBaseApiUrl(customHost)}/files/${fileId}`;
@@ -92,6 +109,19 @@ export const apiService = {
     try {
       const url = `${getBaseApiUrl(customHost)}/devices`;
       const res = await axios.get(url, { timeout: 3000 });
+      return res.data.data || [];
+    } catch {
+      return [];
+    }
+  },
+
+  /**
+   * Trigger active subnet scan
+   */
+  async scanNetwork(customHost = null) {
+    try {
+      const url = `${getBaseApiUrl(customHost)}/devices/scan`;
+      const res = await axios.post(url, {}, { timeout: 15000 });
       return res.data.data || [];
     } catch {
       return [];
