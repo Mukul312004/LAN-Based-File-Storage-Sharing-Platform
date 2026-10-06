@@ -1,4 +1,29 @@
-# LAN File Storage MVP
+# LAN File Storage & Sharing
+
+A self-hosted, LAN-first file storage and sharing platform that lets
+devices on the same network discover each other and transfer files
+without relying on cloud storage.
+
+## Features
+
+-  Automatic LAN device discovery using UDP broadcast
+-  Upload, download, and delete files
+-  Streaming file transfers for large files
+-  MySQL metadata storage with Prisma ORM
+-  Path traversal protection and filename sanitization
+-  Disk usage and storage metrics
+-  Responsive React interface
+-  Docker support
+
+## Tech Stack
+
+**Frontend:** React, Vite, Tailwind CSS  
+**Backend:** Node.js, Express.js  
+**Database:** MySQL, Prisma  
+**Storage:** Node.js filesystem streams  
+**Networking:** UDP / Node.js `dgram`  
+**Testing:** Vitest, Supertest  
+**DevOps:** Docker
 
 > **A LAN-first, self-hosted file storage and sharing application.**  
 > Turn any computer or device into your own lightweight, secure Google Drive running on your local network.
